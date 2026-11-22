@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#101a2b">
+<title>Pokémon Idle Journey — Mundo de Kanto</title>
+<style>
+:root{--bg:#0b1220;--panel:#17243a;--panel2:#101b2d;--line:#344b68;--text:#eef5ff;--muted:#9aacc5;--gold:#ffd166;--green:#66e0a2;--red:#ff7474}
+*{box-sizing:border-box}body{margin:0;background:#0b1220;color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif;padding-bottom:78px}
+header{position:sticky;top:0;z-index:5;background:#0b1220ed;border-bottom:1px solid #2a3d58;padding:12px 14px;display:flex;justify-content:space-between;align-items:center}
+h1{font-size:17px;margin:0;letter-spacing:.4px}header small,.muted,.tiny{color:var(--muted)}header small{font-size:11px}
+main{max-width:850px;margin:auto;padding:12px;display:grid;gap:11px}
+.panel{background:linear-gradient(145deg,#192941,#121d30);border:1px solid #304560;border-radius:15px;padding:12px;box-shadow:0 8px 22px #0003}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+.stat{background:#0d1727;border:1px solid #253a55;border-radius:10px;padding:8px}.stat b{display:block;font-size:17px}.stat span{font-size:10px;color:var(--muted)}
+h2{font-size:15px;margin:0 0 9px}.tiny{font-size:11px}.tag{font-size:10px;padding:4px 7px;border-radius:20px;background:#263a55;color:#cfe2ff}
+button{border:1px solid #49617f;border-radius:10px;background:#2b405e;color:#f1f6ff;font-weight:700;padding:10px 12px;font-size:12px}
+button.primary{background:linear-gradient(135deg,#ffd166,#ffb84d);color:#172033;border:0}button:disabled{opacity:.4}
+.mapwrap{position:relative;border:2px solid #536b87;border-radius:12px;overflow:hidden;background:#203c32}
+canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-action:pan-y}
+.maplabel{position:absolute;top:8px;left:8px;background:#07111dcc;padding:5px 8px;border-radius:8px;font-size:11px}
+.mapbottom{position:absolute;bottom:7px;left:7px;right:7px;display:flex;justify-content:space-between;gap:6px;pointer-events:none}.mapbottom span{background:#07111dcc;border-radius:7px;padding:5px 7px;font-size:10px}
+.controls{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.controls button{flex:1}
+.progress{height:7px;background:#08111e;border-radius:8px;overflow:hidden;margin:5px 0}.progress i{display:block;height:100%;background:linear-gradient(90deg,#50d69a,#c5ed70)}
+.area-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.area{background:#0d1727;border:1px solid #304560;border-radius:10px;padding:9px;text-align:left}.area.active{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.area b{display:block;font-size:12px}.area small{color:var(--muted);font-size:10px}
+.party{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.poke{background:#0d1727;border:1px solid #304560;border-radius:11px;padding:8px;text-align:center;min-width:0}.poke .emoji{font-size:27px}.poke b{display:block;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.poke small{color:var(--muted);font-size:10px}
+.log{height:85px;overflow:auto;background:#091321;border-radius:9px;padding:8px;font-size:11px;color:#cbd9ec;line-height:1.5}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:7;background:#091321f5;border-top:1px solid #304560;display:flex;justify-content:center;padding:6px}
+nav button{flex:1;max-width:180px;border:0;background:transparent;color:var(--muted)}nav button.active{color:var(--gold);background:#263951}
+.tab{display:none}.tab.active{display:block}.notice{background:#28364c;border-left:3px solid var(--gold);border-radius:7px;padding:8px;font-size:11px;color:#d8e5f6}
+@media(min-width:680px){main{grid-template-columns:1.15fr .85fr}.wide{grid-column:1/-1}.mapPanel{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<header><div><h1>⚡ POKÉMON IDLE JOURNEY</h1><small>Kanto • exploração automática • protótipo 3</small></div><div style="text-align:right"><b id="trainerLevel">Treinador Nv. 1</b><br><small id="trainerName">Rjdsss</small></div></header>
+<main>
+<section class="panel wide">
+ <div class="row"><b>🎒 Recursos</b><span class="tag" id="regionTag">KANTO</span></div>
+ <div class="stats">
+  <div class="stat"><b id="coins">0</b><span>🪙 Pokédólares</span></div>
+  <div class="stat"><b id="balls">10</b><span>🔴 Pokébolas</span></div>
+  <div class="stat"><b id="badges">0/8</b><span>🏅 Insígnias</span></div>
+ </div>
+</section>
+<section class="panel mapPanel">
+ <div class="row"><h2>🗺️ Exploração do mundo</h2><span class="tag" id="areaTag">Rota 1</span></div>
+ <div class="mapwrap">
+  <canvas id="world" width="480" height="270"></canvas>
+  <div class="maplabel" id="mapTitle">ROTA 1 · KANTO</div>
+  <div class="mapbottom"><span id="autoStatus">● Exploração automática</span><span id="encounterStatus">Procurando Pokémon…</span></div>
+ </div>
+ <div class="row" style="margin-top:9px"><span class="tiny" id="activity">Seu personagem está explorando a área.</span><b id="levelxp">Nv. 1 • 0 XP</b></div>
+ <div class="progress"><i id="xpbar" style="width:0%"></i></div>
+ <div class="controls"><button class="primary" id="toggleAuto">⏸ Pausar exploração</button><button id="nextArea">Próxima área</button><button id="heal">🏥 Centro Pokémon</button></div>
+</section>
+<section class="panel">
+ <h2>⚔️ Encontro automático</h2>
+ <div class="row"><div><b id="wildName">Rattata selvagem</b><div class="tiny" id="wildMeta">Nv. 2 • Normal</div></div><div id="wildEmoji" style="font-size:36px">🐀</div></div>
+ <div class="progress"><i id="wildbar" style="width:100%;background:linear-gradient(90deg,#ff7c76,#ffbd65)"></i></div>
+ <div class="row"><span class="tiny" id="battleText">A equipe está procurando adversários.</span><b id="battleCount">0 vitórias</b></div>
+ <div class="log" id="log">Bem-vindo a Kanto! Seu personagem e seus Pokémon vão explorar automaticamente. As batalhas acontecem quando encontram Pokémon selvagens.</div>
+</section>
+<section class="panel">
+ <h2>👥 Equipe Pokémon <span class="tiny" id="partyCount">1/6</span></h2>
+ <div class="party" id="party"></div>
+ <div class="tiny" style="margin-top:8px">Até 6 Pokémon acompanham você. O líder aparece à frente do grupo.</div>
+</section>
+<section class="panel">
+ <h2>📍 Áreas de Kanto</h2><div class="area-grid" id="areas"></div>
+</section>
+<section class="panel tab wide" id="dexTab">
+ <h2>📖 Pokédex descoberta</h2><div class="area-grid" id="dex"></div>
+</section>
+<section class="panel tab wide" id="rankTab">
+ <h2>🏆 Ranking local</h2><div class="notice">Pontuação de demonstração salva neste navegador. Ranking mundial exige servidor e contas online.</div>
+ <div class="row" style="margin-top:9px"><b id="rankName">Rjdsss</b><b id="score">0 pontos</b></div>
+</section>
+<section class="panel wide">
+ <div class="row"><b>⏳ Progresso offline</b><span class="tag">até 24 horas</span></div>
+ <div class="tiny" id="offlineText">O jogo calcula recompensas pelo tempo desde sua última visita.</div>
+ <div class="notice" style="margin-top:8px">Ao voltar, o jogo calcula até 24 horas de exploração e batalhas simuladas. Nesta versão, o mapa e a animação funcionam enquanto a página está aberta; offline são calculadas recompensas equivalentes.</div>
+</section>
+<section class="panel wide">
+ <div class="row"><span class="tiny">Salvamento automático neste aparelho</span><button id="reset">Reiniciar jogo</button></div>
+ <div class="notice" style="margin-top:8px">Protótipo independente de estudo. Personagens e nomes Pokémon são propriedade de seus respectivos titulares; distribuição pública ou comercial requer autorização.</div>
+</section>
+</main>
+<nav><button class="active" data-tab="game">🌳 Mundo</button><button data-tab="dexTab">📖 Pokédex</button><button data-tab="rankTab">🏆 Ranking</button></nav>
+<script>
+const P=[
+{name:"Pikachu",emoji:"⚡",type:"Elétrico",atk:13,hp:44},
+{name:"Bulbasaur",emoji:"🌱",type:"Planta/Veneno",atk:10,hp:50},
+{name:"Charmander",emoji:"🔥",type:"Fogo",atk:12,hp:42},
+{name:"Squirtle",emoji:"💧",type:"Água",atk:10,hp:55},
+{name:"Pidgey",emoji:"🐦",type:"Normal/Voador",atk:8,hp:36},
+{name:"Rattata",emoji:"🐀",type:"Normal",atk:9,hp:34},
+{name:"Caterpie",emoji:"🐛",type:"Inseto",atk:7,hp:39},
+{name:"Geodude",emoji:"🪨",type:"Pedra/Terra",atk:12,hp:60},
+{name:"Oddish",emoji:"🌼",type:"Planta/Veneno",atk:10,hp:48},
+{name:"Psyduck",emoji:"🦆",type:"Água",atk:11,hp:48},
+{name:"Gastly",emoji:"👻",type:"Fantasma/Veneno",atk:15,hp:38},
+{name:"Eevee",emoji:"🦊",type:"Normal",atk:14,hp:47},
+{name:"Dratini",emoji:"🐉",type:"Dragão",atk:17,hp:49},
+{name:"Mewtwo",emoji:"🧬",type:"Psíquico",atk:55,hp:180,legendary:true}
+];
+const A=[
+{name:"Rota 1",desc:"Pallet → Viridian",level:1,terrain:0,spawns:[4,5,6]},
+{name:"Floresta de Viridian",desc:"Bosque fechado",level:3,terrain:1,spawns:[6,4,8]},
+{name:"Rota 3",desc:"Caminho de Pewter",level:5,terrain:0,spawns:[4,5,7]},
+{name:"Mt. Moon",desc:"Caverna misteriosa",level:7,terrain:2,spawns:[7,10,12]},
+{name:"Rota 5",desc:"Arredores de Cerulean",level:10,terrain:0,spawns:[0,9,11]},
+{name:"Túnel Rochoso",desc:"Caverna profunda",level:13,terrain:2,spawns:[7,10,12]},
+{name:"Zona Safari",desc:"Área selvagem",level:17,terrain:1,spawns:[8,9,11]},
+{name:"Ilha Cinnabar",desc:"Costa vulcânica",level:21,terrain:3,spawns:[2,9,12]}
+];
+const fresh={name:"Rjdsss",level:1,xp:0,coins:120,balls:10,badges:0,wins:0,area:0,team:[{id:1,level:5,hp:50}],dex:[1],auto:true,px:80,py:140,dir:1,last:Date.now(),offlineClaim:0,enemyId:5,enemyHp:34,enemyMax:34,encounterTicks:0};
+let s=Object.assign({},fresh,JSON.parse(localStorage.getItem("pij3")||"{}"));let lastTime=s.last||Date.now();
+const $=id=>document.getElementById(id),canvas=$("world"),ctx=canvas.getContext("2d");
+let frame=0,anim=null;
+function save(){s.last=Date.now();localStorage.setItem("pij3",JSON.stringify(s))}
+function say(t){$("log").innerHTML=t+"<br>"+$("log").innerHTML}
+function teamPower(){return s.team.reduce((v,m)=>v+P[m.id].atk+m.level*2,0)}
+function xpNeed(){return s.level*45}
+function addXP(n){s.xp+=n;while(s.xp>=xpNeed()){s.xp-=xpNeed();s.level++;s.coins+=40;s.team.forEach(m=>m.level++);say("✨ Treinador chegou ao nível "+s.level+"! A equipe ficou mais forte.")}}
+function spawnEnemy(){let pool=A[s.area].spawns,id=pool[Math.floor(Math.random()*pool.length)];s.enemyId=id;let p=P[id];s.enemyMax=p.hp+s.level*2;s.enemyHp=s.enemyMax;$("wildName").textContent=p.name+" selvagem";$("wildEmoji").textContent=p.emoji;$("wildMeta").textContent="Nv. "+Math.max(1,s.level-1)+" • "+p.type;$("wildbar").style.width="100%"}
+function winBattle(){let p=P[s.enemyId],gain=8+s.area*3,coin=10+s.area*4;s.wins++;s.coins+=coin;addXP(gain);if(!s.dex.includes(s.enemyId))s.dex.push(s.enemyId);say("🏆 Sua equipe venceu "+p.name+"! +"+gain+" XP, +"+coin+" moedas.");if(s.wins%10===0&&s.badges<8){s.badges++;say("🏅 Você conquistou uma insígnia!");}spawnEnemy()}
+function battleTick(){let p=P[s.enemyId],damage=Math.max(3,Math.floor(teamPower()/3));s.enemyHp-=damage;if(s.enemyHp<=0){winBattle()}else{let alive=s.team.filter(m=>m.hp>0);if(alive.length){let t=alive[Math.floor(Math.random()*alive.length)];t.hp-=Math.max(1,Math.ceil(p.atk/8));if(t.hp<=0){t.hp=0;say(P[t.id].name+" precisa descansar.")}}else{s.team.forEach(m=>m.hp=Math.max(1,Math.floor(P[m.id].hp*.7)));say("🏥 A equipe recuou e recuperou parte da energia.")}}}
+function drawTile(x,y,color){ctx.fillStyle=color;ctx.fillRect(x,y,30,30)}
+function drawMap(){
+ let seed=s.area+1;ctx.clearRect(0,0,480,270);
+ let base=["#5d9b55","#397d4c","#776b52","#b66a3e"][A[s.area].terrain];ctx.fillStyle=base;ctx.fillRect(0,0,480,270);
+ for(let y=0;y<9;y++)for(let x=0;x<16;x++){let v=(x*17+y*31+seed*13)%11,xx=x*30,yy=y*30;
+ if(A[s.area].terrain===2){drawTile(xx,yy,v<4?"#756b62":v<7?"#887a69":"#675e58")}
+ else if(v<3){drawTile(xx,yy,A[s.area].terrain===1?"#286342":"#3f8649");ctx.fillStyle="#205638";ctx.fillRect(xx+7,yy+5,16,17);ctx.fillStyle="#4b9a52";ctx.fillRect(xx+10,yy+2,10,12)}
+ else if(v===5){ctx.fillStyle="#c6b77b";ctx.fillRect(xx+5,yy+12,20,5)}
+ else if(v===8&&A[s.area].terrain!==2){ctx.fillStyle="#4c91b4";ctx.fillRect(xx+3,yy+3,24,24)}
+ }
+ // path
+ ctx.fillStyle=A[s.area].terrain===2?"#a99b83":"#c6b27c";ctx.fillRect(0,116,480,42);ctx.fillRect(205,0,40,270);
+ // landmarks
+ ctx.fillStyle="#9c5544";ctx.fillRect(30,36,58,45);ctx.fillStyle="#e7c98b";ctx.fillRect(38,47,42,34);ctx.fillStyle="#563c32";ctx.fillRect(52,61,13,20);
+ // player and followers
+ s.team.slice(0,6).forEach((m,i)=>{if(i===0)return;let fx=s.px-((i%3)+1)*13,fy=s.py+Math.floor((i+1)/3)*14;drawSprite(fx,fy,P[m.id].emoji,"#f0d36c")});
+ drawSprite(s.px,s.py,"🧢","#6eb6ff");
+ if(frame%80<40){ctx.fillStyle="#fff7";ctx.fillRect(s.px+12,s.py-17,3,3)}
+}
+function drawSprite(x,y,emoji,color){ctx.fillStyle="#101827";ctx.fillRect(x-8,y-7,18,19);ctx.fillStyle=color;ctx.fillRect(x-6,y-9,14,14);ctx.font="15px system-ui";ctx.fillText(emoji,x-8,y+5);ctx.fillStyle="#111";ctx.fillRect(x-4,y+11,4,4);ctx.fillRect(x+4,y+11,4,4)}
+function tick(){
+ frame++;
+ if(s.auto){s.px+=s.dir*.75;if(s.px>425){s.dir=-1;s.py=70+Math.random()*130}else if(s.px<48){s.dir=1;s.py=70+Math.random()*130}
+ s.encounterTicks++;if(s.encounterTicks>=44){s.encounterTicks=0;battleTick();$("battleText").textContent="Combate automático concluído";}}
+ drawMap();$("activity").textContent=s.auto?"Treinador e equipe explorando automaticamente…":"Exploração pausada";$("autoStatus").textContent=s.auto?"● Exploração automática":"Ⅱ Exploração pausada";
+ $("battleCount").textContent=s.wins+" vitórias";$("wildbar").style.width=Math.max(0,s.enemyHp/s.enemyMax*100)+"%";$("battleText").textContent="Próximo encontro em andamento";
+ if(frame%20===0)save();renderUI();
+}
+function renderUI(){
+ $("trainerLevel").textContent="Treinador Nv. "+s.level;$("trainerName").textContent=s.name;$("coins").textContent=s.coins;$("balls").textContent=s.balls;$("badges").textContent=s.badges+"/8";
+ $("areaTag").textContent=A[s.area].name;$("mapTitle").textContent=A[s.area].name.toUpperCase()+" · KANTO";$("regionTag").textContent="KANTO";
+ $("levelxp").textContent="Nv. "+s.level+" • "+s.xp+" XP";$("xpbar").style.width=Math.min(100,s.xp/xpNeed()*100)+"%";
+ $("partyCount").textContent=s.team.length+"/6";$("party").innerHTML=s.team.map((m,i)=>`<div class="poke"><div class="emoji">${P[m.id].emoji}</div><b>${P[m.id].name}</b><small>Nv. ${m.level}<br>${m.hp}/${P[m.id].hp} HP</small></div>`).join("");
+ $("areas").innerHTML=A.map((a,i)=>`<button class="area ${i===s.area?'active':''}" ${s.level<a.level?'disabled':''} onclick="changeArea(${i})"><b>${i===s.area?'📍 ':''}${a.name}</b><small>${a.desc}<br>Nível ${a.level}+</small></button>`).join("");
+ $("dex").innerHTML=s.dex.map(id=>`<div class="area"><b>${P[id].emoji} ${P[id].name}</b><small>${P[id].type}</small></div>`).join("");
+ $("rankName").textContent=s.name;$("score").textContent=(s.wins*100+s.level*50)+" pontos";
+}
+function changeArea(i){if(s.level<A[i].level)return;s.area=i;s.px=80;s.py=140;s.encounterTicks=0;spawnEnemy();say("🗺️ Você chegou a "+A[i].name+".");renderUI()}
+$("toggleAuto").onclick=()=>{s.auto=!s.auto;$("toggleAuto").textContent=s.auto?"⏸ Pausar exploração":"▶ Retomar exploração";save();renderUI()};
+$("nextArea").onclick=()=>{let i=Math.min(A.length-1,s.area+1);if(i===s.area){say("Você chegou à última área disponível de Kanto neste protótipo.")}else if(s.level<A[i].level){say("Treine até o nível "+A[i].level+" para desbloquear "+A[i].name+".")}else changeArea(i)};
+$("heal").onclick=()=>{s.team.forEach(m=>m.hp=P[m.id].hp);say("🏥 Centro Pokémon: equipe recuperada.");renderUI();save()};
+$("reset").onclick=()=>{if(confirm("Apagar todo o progresso salvo?")){localStorage.removeItem("pij3");location.reload()}};
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("dexTab").classList.toggle("active",b.dataset.tab==="dexTab");$("rankTab").classList.toggle("active",b.dataset.tab==="rankTab")});
+function applyOffline(){let now=Date.now(),elapsed=Math.max(0,Math.min(24*3600*1000,now-(s.last||now)));if(elapsed>60000){let mins=Math.floor(elapsed/60000),battles=Math.floor(mins/0.13),xp=battles*(8+s.area*3),coins=battles*(10+s.area*4);s.wins+=battles;s.coins+=coins;addXP(xp);$("offlineText").textContent="Você ficou fora por "+Math.floor(elapsed/3600000)+"h "+Math.floor((elapsed%3600000)/60000)+"min. Recompensas simuladas: "+battles+" batalhas, "+xp+" XP e "+coins+" Pokédólares.";say("🌙 Progresso offline: "+battles+" batalhas simuladas!");}else{$("offlineText").textContent="Nenhum progresso offline pendente. O limite é de 24 horas."}s.last=now;save()}
+applyOffline();spawnEnemy();renderUI();setInterval(tick,180);
+</script></body></html>
