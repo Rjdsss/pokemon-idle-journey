@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827"><title>Pokémon Idle Journey — Protótipo</title>
+<style>
+:root{--bg:#0b1220;--panel:#151f31;--text:#edf4ff;--muted:#9aabc4;--gold:#ffd166;--green:#5de0a0;--blue:#6eb6ff;--red:#ff7777}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#1a2c48 0,#0b1220 48%);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif;padding:0 0 78px}
+header{padding:17px 15px 12px;position:sticky;top:0;background:#0b1220ed;backdrop-filter:blur(12px);z-index:3;border-bottom:1px solid #293750}
+h1{font-size:20px;margin:0}header small,.tiny{color:var(--muted)}main{max-width:780px;margin:auto;padding:13px;display:grid;gap:12px}
+.panel{background:linear-gradient(145deg,#19263b,#121c2d);border:1px solid #2b3b55;border-radius:17px;padding:13px;box-shadow:0 10px 25px #0003}
+.row{display:flex;align-items:center;justify-content:space-between;gap:9px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
+.stat{background:#0d1727;border-radius:11px;padding:9px}.stat b{display:block;font-size:17px}.stat span{font-size:11px;color:var(--muted)}
+h2{font-size:16px;margin:0 0 10px}.tiny{font-size:11px}.muted{color:var(--muted)}
+button{border:0;border-radius:11px;padding:11px 13px;font-weight:750;color:#081321;background:linear-gradient(135deg,#ffd166,#ffb84d);cursor:pointer}
+button.secondary{background:#2b3e59;color:var(--text);border:1px solid #49617f}button:disabled{opacity:.4}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.actions button{flex:1;min-width:105px}
+.monster{display:flex;align-items:center;gap:10px;background:#0d1727;border:1px solid #2b3b55;padding:9px;border-radius:13px;margin:6px 0}
+.avatar{width:54px;height:54px;border-radius:14px;background:linear-gradient(145deg,#324d70,#192a43);display:grid;place-items:center;font-size:29px;flex:none}
+.bar{height:8px;background:#08111e;border-radius:9px;overflow:hidden;margin:5px 0}.bar i{display:block;height:100%;background:linear-gradient(90deg,#48d597,#b3f17b);width:50%}
+.enemy{display:flex;justify-content:space-between;align-items:center;background:#0d1727;padding:11px;border-radius:13px;margin-top:7px}
+.log{height:100px;overflow:auto;background:#0a1422;border-radius:11px;padding:9px;font-size:12px;color:#c4d3e8;line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.region{background:#0d1727;border:1px solid #2b3b55;border-radius:12px;padding:10px}.region.active{border-color:var(--gold)}
+.notice{border-left:3px solid var(--gold);padding:8px 10px;background:#293047;border-radius:8px;font-size:12px;color:#d9e4f5}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;background:#0a1220f5;border-top:1px solid #293750;padding:7px;z-index:5}
+nav button{background:transparent;color:var(--muted);padding:9px 12px;flex:1;max-width:160px;font-size:12px}nav button.active{color:var(--gold);background:#26344a}
+.tab{display:none}.tab.active{display:block}.wide{grid-column:1/-1}
+@media(min-width:650px){main{grid-template-columns:1fr 1fr}}
+</style></head>
+<body>
+<header><div class="row"><div><h1>⚡ POKÉMON IDLE JOURNEY</h1><small>Protótipo de estudo • jornada por Kanto</small></div><div style="text-align:right"><b id="levelTop">Nv. 5</b><br><small id="playerTop">Treinador</small></div></div></header>
+<main>
+<section class="panel wide"><div class="tiny">RECURSOS DO TREINADOR</div><div class="stats">
+<div class="stat"><b id="coins">250</b><span>🪙 Pokédólares</span></div><div class="stat"><b id="balls">8</b><span>🔴 Pokébolas</span></div><div class="stat"><b id="badges">0/8</b><span>🏅 Insígnias</span></div></div></section>
+<section class="panel">
+<h2>🧢 Treinador e progresso</h2><div class="row"><b id="trainer">Treinador</b><span class="tiny" id="route">Rota 1 • Kanto</span></div>
+<div class="bar"><i id="xpBar"></i></div><div class="tiny" id="xpText">0/100 XP para o próximo nível</div>
+<div class="stats"><div class="stat"><b id="wins">0</b><span>Vitórias</span></div><div class="stat"><b id="teamPower">0</b><span>Poder da equipe</span></div><div class="stat"><b id="dex">1</b><span>Pokédex</span></div></div>
+<div class="actions"><button id="train">Treinar equipe</button><button class="secondary" id="rest">Centro Pokémon</button></div>
+</section>
+<section class="panel">
+<h2>⚔️ Batalha automática</h2><div class="tiny">A equipe luta sozinha. Tipos e níveis influenciam o resultado.</div>
+<div class="enemy"><div style="flex:1"><b id="enemyName">Rattata selvagem</b><div class="tiny" id="enemyLevel">Nv. 3 • Normal</div><div class="bar"><i id="enemyBar"></i></div></div><div id="enemyEmoji" style="font-size:36px">🐀</div></div>
+<div class="row" style="margin:9px 0"><span class="tiny" id="battleStatus">Batalha em andamento</span><b id="timer">3s</b></div><div class="log" id="log">Sua jornada começa em Kanto. Sua equipe batalha automaticamente a cada poucos segundos.</div>
+</section>
+<section class="panel wide">
+<h2>👥 Sua equipe (máximo 6)</h2><div class="tiny">Toque em um Pokémon para defini-lo como líder. O protótipo usa dados simplificados.</div><div id="team"></div>
+</section>
+<section class="panel">
+<h2>🎒 Capturas</h2><div class="tiny">Pokémon comuns aparecem nas rotas. Lendários exigem condições especiais e têm chance muito baixa.</div>
+<div class="row" style="margin-top:10px"><span>Pokébolas</span><b id="ballCount">8</b></div>
+<div class="actions"><button id="capture">Capturar selvagem</button><button class="secondary" id="great">Comprar 3 Great Balls (90)</button></div>
+<div class="notice" style="margin-top:9px">Lendários: chance-base de captura de 1% neste protótipo. Alguns encontros especiais serão desbloqueados mais adiante.</div>
+</section>
+<section class="panel">
+<h2>🏙️ Kanto: rotas e cidades</h2><div class="grid" id="routes"></div>
+</section>
+<section class="panel wide tab" id="dexTab">
+<h2>📖 Pokédex</h2><div id="dexList" class="grid"></div>
+</section>
+<section class="panel wide tab" id="rankTab">
+<h2>🏆 Ranking de treinadores</h2><div class="notice">Ranking local de demonstração. Para ranking global real, a próxima etapa é criar login e banco de dados online.</div>
+<div class="row" style="margin-top:10px"><input id="nameInput" maxlength="18" placeholder="Nome do treinador" style="margin:0"><button id="saveName">Salvar</button></div><div id="ranking" style="margin-top:10px"></div>
+</section>
+<section class="panel wide"><div class="row"><span class="tiny">Salvamento automático neste navegador</span><button class="secondary" id="reset">Reiniciar</button></div><div class="notice" style="margin-top:9px">Protótipo não oficial para estudo. Não inclui imagens, sprites, sons ou arquivos oficiais de Pokémon. O uso público/comercial de marcas e personagens oficiais exige autorização dos titulares.</div></section>
+</main>
+<nav><button class="active" data-tab="game">🏕️ Jornada</button><button data-tab="dexTab">📖 Pokédex</button><button data-tab="rankTab">🏆 Ranking</button></nav>
+<script>
+const mons=[
+{name:"Pikachu",no:25,type:"Elétrico",emoji:"⚡",atk:12,hp:42,rarity:"Comum"},
+{name:"Bulbasaur",no:1,type:"Planta/Veneno",emoji:"🌱",atk:10,hp:48,rarity:"Inicial"},
+{name:"Charmander",no:4,type:"Fogo",emoji:"🔥",atk:13,hp:40,rarity:"Inicial"},
+{name:"Squirtle",no:7,type:"Água",emoji:"💧",atk:10,hp:52,rarity:"Inicial"},
+{name:"Pidgey",no:16,type:"Normal/Voador",emoji:"🐦",atk:8,hp:35,rarity:"Comum"},
+{name:"Rattata",no:19,type:"Normal",emoji:"🐀",atk:9,hp:32,rarity:"Comum"},
+{name:"Caterpie",no:10,type:"Inseto",emoji:"🐛",atk:6,hp:38,rarity:"Comum"},
+{name:"Geodude",no:74,type:"Pedra/Terra",emoji:"🪨",atk:12,hp:55,rarity:"Incomum"},
+{name:"Gastly",no:92,type:"Fantasma/Veneno",emoji:"👻",atk:15,hp:35,rarity:"Raro"},
+{name:"Eevee",no:133,type:"Normal",emoji:"🦊",atk:13,hp:44,rarity:"Raro"},
+{name:"Dratini",no:147,type:"Dragão",emoji:"🐉",atk:16,hp:46,rarity:"Muito raro"},
+{name:"Mewtwo",no:150,type:"Psíquico",emoji:"🧬",atk:55,hp:180,rarity:"Lendário",legendary:true},
+{name:"Articuno",no:144,type:"Gelo/Voador",emoji:"🧊",atk:48,hp:155,rarity:"Lendário",legendary:true},
+{name:"Zapdos",no:145,type:"Elétrico/Voador",emoji:"🌩️",atk:50,hp:150,rarity:"Lendário",legendary:true},
+{name:"Moltres",no:146,type:"Fogo/Voador",emoji:"🔥",atk:49,hp:158,rarity:"Lendário",legendary:true}
+];
+const routes=[
+{name:"Rota 1",place:"Cidade de Pallet → Viridian",need:1,enc:[4,5,6]},
+{name:"Floresta de Viridian",place:"Viridian",need:3,enc:[6,4,5]},
+{name:"Rota 3",place:"Pewter → Mt. Moon",need:5,enc:[4,5,7]},
+{name:"Mt. Moon",place:"Caverna",need:7,enc:[7,8,9]},
+{name:"Rota 5",place:"Cerulean",need:10,enc:[0,9,10]},
+{name:"Túnel Rochoso",place:"Lavender",need:13,enc:[7,8,10]},
+{name:"Zona Safari",place:"Fuchsia",need:17,enc:[9,10,7]},
+{name:"Caminho da Vitória",place:"Indigo Plateau",need:22,enc:[8,10,9]}
+];
+let state=JSON.parse(localStorage.getItem("pokemonIdleJourneyV2")||"null")||{
+name:"Treinador",level:5,xp:0,coins:250,balls:8,great:0,badges:0,wins:0,route:0,
+team:[{id:0,level:5,hp:42},{id:1,level:5,hp:48},{id:2,level:4,hp:40}],caught:[0,1,2],active:0,
+enemy:5,enemyHp:30,enemyMax:30,seconds:3
+};
+const $=id=>document.getElementById(id);let enemyIndex=5;
+function save(){localStorage.setItem("pokemonIdleJourneyV2",JSON.stringify(state))}
+function say(t){$("log").innerHTML=t+"<br>"+$("log").innerHTML}
+function teamAtk(){return state.team.reduce((a,m)=>a+mons[m.id].atk+m.level*2,0)}
+function addXP(n){state.xp+=n;while(state.xp>=state.level*35){state.xp-=state.level*35;state.level++;state.coins+=30;say("✨ Treinador subiu para o nível "+state.level+"! +30 Pokédólares.")}}
+function encounter(){let r=routes[state.route],id=r.enc[Math.floor(Math.random()*r.enc.length)];enemyIndex=id;let m=mons[id];state.enemy=id;state.enemyMax=m.hp+state.level*3;state.enemyHp=state.enemyMax;state.seconds=3}
+function activeMons(){return state.team.filter(m=>m.hp>0)}
+function battle(){let m=mons[state.enemy],power=Math.max(3,Math.floor(teamAtk()/4));state.enemyHp-=power;
+if(state.enemyHp<=0){state.wins++;let reward=12+state.route*5;state.coins+=reward;addXP(10+state.route*3);say("🏆 Vitória! Derrotou "+m.name+". +"+reward+" Pokédólares.");if(state.wins%8===0&&state.badges<8){state.badges++;say("🏅 Insígnia conquistada! Total: "+state.badges+"/8.");}encounter();}
+else{let living=activeMons();if(living.length){let target=living[Math.floor(Math.random()*living.length)];target.hp-=Math.max(1,Math.floor(m.atk/5));if(target.hp<=0){target.hp=0;say("💫 "+mons[target.id].name+" ficou fora de combate.");if(!activeMons().length){state.team.forEach(x=>x.hp=Math.max(1,Math.floor(mons[x.id].hp*.6)));say("🏥 A equipe foi recuperada no Centro Pokémon.");}}}}
+render()}
+function render(){
+$("levelTop").textContent="Nv. "+state.level;$("playerTop").textContent=state.name;$("trainer").textContent=state.name;
+$("coins").textContent=state.coins;$("balls").textContent=state.balls;$("badges").textContent=state.badges+"/8";$("wins").textContent=state.wins;
+$("teamPower").textContent=teamAtk();$("dex").textContent=state.caught.length;$("ballCount").textContent=state.balls;
+$("route").textContent=routes[state.route].name+" • Kanto";$("xpBar").style.width=Math.min(100,state.xp/(state.level*35)*100)+"%";$("xpText").textContent=state.xp+"/"+state.level*35+" XP para o próximo nível";
+let em=mons[state.enemy];$("enemyName").textContent=em.name+" selvagem";$("enemyEmoji").textContent=em.emoji;$("enemyLevel").textContent="Nv. "+Math.max(2,state.level-1)+" • "+em.type;$("enemyBar").style.width=Math.max(0,state.enemyHp/state.enemyMax*100)+"%";$("timer").textContent=state.seconds+"s";
+$("team").innerHTML=state.team.map((p,i)=>{let m=mons[p.id];return `<div class="monster" style="${i===state.active?'border-color:#ffd166':''}" onclick="setActive(${i})"><div class="avatar">${m.emoji}</div><div style="flex:1"><b>${m.name}</b> <span class="tiny">Nv. ${p.level} ${i===state.active?'• Líder':''}</span><div class="tiny">${m.type} • ATQ ${m.atk+p.level*2} • ${p.hp}/${m.hp} HP</div><div class="bar"><i style="width:${Math.max(0,p.hp/m.hp*100)}%"></i></div></div></div>`}).join("")+(state.team.length<6?'<div class="tiny">Espaços livres: '+(6-state.team.length)+'</div>':'<div class="tiny">Equipe completa: 6/6</div>');
+$("routes").innerHTML=routes.map((r,i)=>`<div class="region ${i===state.route?'active':''}"><b>${r.name}</b><div class="tiny">${r.place}</div><div class="tiny">Desbloqueia no nível ${r.need}</div><button class="secondary" style="width:100%;padding:8px;margin-top:7px" ${state.level<r.need?'disabled':''} onclick="goRoute(${i})">${i===state.route?'Atual':'Viajar'}</button></div>`).join("");
+$("dexList").innerHTML=state.caught.map(id=>{let m=mons[id];return `<div class="region"><b>${m.emoji} #${m.no} ${m.name}</b><div class="tiny">${m.type} • ${m.rarity}</div></div>`}).join("");
+$("nameInput").value=state.name;$("ranking").innerHTML=`<div class="enemy"><b>1. ${state.name}</b><b>${state.wins*100+state.level*50} pts</b></div><div class="tiny">Pontuação local deste aparelho; ranking global será conectado ao servidor numa próxima etapa.</div>`;
+save()}
+function setActive(i){state.active=i;render()}
+function goRoute(i){if(state.level<routes[i].need)return;state.route=i;encounter();say("🗺️ Você viajou para "+routes[i].name+".");render()}
+$("train").onclick=()=>{state.team.forEach(p=>p.level++);addXP(15);say("💪 Treino concluído! Toda a equipe ganhou um nível.");render()};
+$("rest").onclick=()=>{state.team.forEach(p=>p.hp=mons[p.id].hp);say("🏥 Equipe totalmente recuperada.");render()};
+$("capture").onclick=()=>{let wild=mons[state.enemy];if(state.balls<1){say("Sem Pokébolas!");return}state.balls--;let chance=wild.legendary?.01:(wild.rarity==="Muito raro"?.12:wild.rarity==="Raro"?.32:.62);if(Math.random()<chance){if(!state.caught.includes(state.enemy))state.caught.push(state.enemy);if(state.team.length<6){state.team.push({id:state.enemy,level:Math.max(2,state.level-1),hp:wild.hp});say("🎉 "+wild.name+" foi capturado e entrou na equipe!")}else say("🎉 "+wild.name+" capturado! Sua equipe está cheia; ficou na Pokédex.")}else say(wild.legendary?"A criatura lendária resistiu à Pokébola! Chance muito baixa.":"A Pokébola não conseguiu segurar "+wild.name+".");render()};
+$("great").onclick=()=>{if(state.coins<90){say("Pokédólares insuficientes.");return}state.coins-=90;state.balls+=3;say("Comprou 3 Pokébolas especiais (representadas pelas bolas extras do protótipo).");render()};
+$("saveName").onclick=()=>{let n=$("nameInput").value.trim();if(n)state.name=n.slice(0,18);render()};
+$("reset").onclick=()=>{if(confirm("Apagar o progresso salvo neste navegador?")){localStorage.removeItem("pokemonIdleJourneyV2");location.reload()}};
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");$("dexTab").classList.toggle("active",b.dataset.tab==="dexTab");$("rankTab").classList.toggle("active",b.dataset.tab==="rankTab")});
+setInterval(()=>{state.seconds--;if(state.seconds<=0){battle();state.seconds=3}else render()},1000);
+render();
+</script></body></html>
